@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -18,11 +18,23 @@
  * Most of this left blank, may add fields later
  */
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*};
-use gio::Settings;
-use glib::{once_cell::sync::Lazy, once_cell::sync::OnceCell, FromVariant, ParamSpec, Value};
+// std
+use std::sync::OnceLock;
+use std::cell::{
+    Cell, OnceCell
+};
+// gtk-rs
 use gtk::subclass::prelude::*;
-use std::cell::Cell;
+use adwaita::{
+    gio, glib,
+    prelude::*,// subclass::prelude::*
+};
+use gio::Settings;
+use glib::{
+    ParamSpec,
+    variant::FromVariant,
+    value::Value
+};
 
 // Modules
 //
@@ -104,11 +116,12 @@ impl ObjectImpl for Formatter {
      * Notes:
      *
      */
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self) {
         // Call "constructed" on parent
-        self.parent_constructed(obj);
+        self.parent_constructed();
 
         // Setup
+        let obj: glib::BorrowedObject<super::Formatter> = self.obj();
         obj.setup_settings();
     }
 
@@ -137,16 +150,15 @@ impl ObjectImpl for Formatter {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 //
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -165,7 +177,12 @@ impl ObjectImpl for Formatter {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, _value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        _value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -190,7 +207,11 @@ impl ObjectImpl for Formatter {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {

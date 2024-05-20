@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,10 +21,16 @@
 mod imp;
 
 // Imports
-use adwaita::{gio, glib};
+// std
+//
+// gtk-rs
+use adwaita::{
+    gio, glib
+};
 use gio::Settings;
 use glib::Object;
 use gtk::subclass::prelude::*;
+
 // Modules
 use crate::APP_ID;
 
@@ -68,8 +74,11 @@ impl Formatter {
      * Notes:
      *
      */
-    pub fn new(func: fn(Vec<String>, Option<Vec<(String, String)>>) -> Option<String>) -> Self {
-        let obj: Formatter = Object::new(&[]).expect("Failed to create `Formatter`.");
+    pub fn new(
+        func: fn(Vec<String>, Option<Vec<(String, String)>>) -> Option<String>
+    ) -> Self {
+        // Create Object        
+        let obj: Formatter = Object::builder::<Formatter>().build();
 
         // Set properties
         obj.imp().func.set(Some(func));
