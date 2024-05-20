@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -31,10 +31,20 @@ mod modificationwindow;
 mod settingswindow;
 
 // Imports
-use adwaita::{gio, prelude::*, Application};
+// std
+//
+// gtk-rs
+use adwaita::{
+    gio,
+    prelude::*,
+    Application
+};
 use gdk::Display;
 use gio::resources_register_include;
-use gtk::{CssProvider, StyleContext};
+use gtk::{
+    CssProvider,
+    style_context_add_provider_for_display
+};
 
 // Constants
 const APP_ID: &str = "com.gtk_d.NvidiaMonitorRust";
@@ -127,7 +137,7 @@ fn load_css() {
     provider.load_from_path("style.css");
 
     // Add the provider to the default screen
-    StyleContext::add_provider_for_display(
+    style_context_add_provider_for_display(
         &Display::default().expect("..Could not connect to a display."),
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
