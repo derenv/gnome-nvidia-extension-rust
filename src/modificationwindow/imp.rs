@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -18,17 +18,29 @@
  *
  */
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*, ActionRow};
+// std
+use std::sync::OnceLock;
+use std::cell::{
+    Cell, OnceCell, RefCell
+};
+use std::rc::Rc;
+// gtk-rs
+use gtk::{
+    subclass::prelude::*,
+    Button, CompositeTemplate, DropDown, Entry, ListBox, SpinButton, StringList, TemplateChild
+};
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*,
+    ActionRow
+};
 use gio::Settings;
 use glib::{
-    once_cell::sync::Lazy, once_cell::sync::OnceCell, signal::Inhibit,
-    subclass::InitializingObject, FromVariant, ParamSpec, Value,
+    signal::Propagation,
+    subclass::InitializingObject, ParamSpec,
+    variant::FromVariant, variant::Variant,
+    value::Value
 };
-use gtk::{
-    subclass::prelude::*, Button, CompositeTemplate, DropDown, Entry, ListBox, SpinButton,
-    StringList, TemplateChild,
-};
-use std::{cell::Cell, cell::RefCell, rc::Rc};
 
 // Modules
 use crate::gpu_page::GpuPage;
@@ -825,7 +837,10 @@ impl ModificationWindow {
      * Notes:
      *
      */
-    pub fn get_setting<T: FromVariant>(&self, name: &str) -> T {
+    pub fn get_setting<T: FromVariant>(
+        &self,
+        name: &str
+    ) -> T {
         // Return the value of the property
         match self.settings.get() {
             Some(settings) => settings.get::<T>(name),
@@ -849,7 +864,11 @@ impl ModificationWindow {
      * Notes:
      *
      */
-    pub fn update_setting<T: ToVariant>(&self, name: &str, value: T) {
+        pub fn update_setting<T: Into<Variant> + Clone>(
+            &self,
+            name: &str,
+            value: T
+        ) {
         // Fetch settings
         match self.settings.get() {
             Some(settings) => match settings.set(name, &value) {
@@ -1082,11 +1101,12 @@ impl ObjectImpl for ModificationWindow {
      * Notes:
      *
      */
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self) {
         // Call "constructed" on parent
-        self.parent_constructed(obj);
+        self.parent_constructed();
 
         // Setup
+        let _obj: glib::BorrowedObject<super::ModificationWindow> = self.obj();
         // obj.setup_settings();
         // obj.setup_widgets();
         // obj.restore_data();
@@ -1119,20 +1139,19 @@ impl ObjectImpl for ModificationWindow {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 glib::ParamSpecInt::builder("old-view-id").build(),
                 glib::ParamSpecInt::builder("new-view-id").build(),
                 glib::ParamSpecString::builder("old-view-title").build(),
                 glib::ParamSpecString::builder("new-view-title").build(),
-                glib::ParamSpecString::builder("uuid").build(),
+                glib::ParamSpecString::builder("uuid").build()
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -1151,7 +1170,12 @@ impl ObjectImpl for ModificationWindow {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -1204,7 +1228,11 @@ impl ObjectImpl for ModificationWindow {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -1284,12 +1312,12 @@ impl WindowImpl for ModificationWindow {
      * Notes:
      *
      */
-    fn close_request(&self, window: &Self::Type) -> Inhibit {
+    fn close_request(&self) -> Propagation {
         // Store state in settings
         self.update_setting("modification-open", false);
 
         // Pass close request on to the parent
-        self.parent_close_request(window)
+        self.parent_close_request()
     }
 }
 

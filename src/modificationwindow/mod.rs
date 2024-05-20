@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,11 +21,21 @@
 mod imp;
 
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*, ActionRow};
-use gio::Settings;
-use glib::{clone, GString, Object};
-use gtk::{Adjustment, DropDown, StringList};
+// std
 use std::cell::RefMut;
+// gtk-rs
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*,
+    ActionRow
+};
+use gio::Settings;
+use glib::{
+    clone, Object
+};
+use gtk::{
+    Adjustment, DropDown, StringList
+};
 
 // Modules
 use crate::{
@@ -81,8 +91,9 @@ impl ModificationWindow {
         parent_window: &GpuPage,
     ) -> Self {
         // Create new window
-        let obj: ModificationWindow = Object::new(&[("application", app)])
-            .expect("`ModificationWindow` should be  instantiable.");
+        let obj: ModificationWindow = Object::builder::<ModificationWindow>()
+            .property("application", app)
+        .build();
 
         // Set custom properties
         obj.set_property("old-view-id", view_id);
@@ -144,12 +155,12 @@ impl ModificationWindow {
      * Notes:
      *
      */
-    fn settings(&self) -> &Settings {
-        self.imp()
-            .settings
-            .get()
-            .expect("`settings` should be set in `setup_settings`.")
-    }
+    // fn settings(&self) -> &Settings {
+    //     self.imp()
+    //         .settings
+    //         .get()
+    //         .expect("`settings` should be set in `setup_settings`.")
+    // }
 
     /**
      * Name:
@@ -169,7 +180,9 @@ impl ModificationWindow {
      */
     fn setup_widgets(&self) {
         // Retrieve names of stored views
-        let view_title_list: Vec<GString> = self.settings().strv("viewconfigs");
+        let view_title_list: Vec<String> = self.imp().get_setting::<Vec<String>>("viewconfigs");
+        // let view_title_list: Vec<GString> = self.imp().get_setting::<Vec<GString>>("viewconfigs");
+        // let view_title_list: Vec<GString> = self.settings().strv("viewconfigs");
         let view_id: String = self.property::<i32>("old-view-id").to_string();
 
         // Create empty string for the title
@@ -209,7 +222,8 @@ impl ModificationWindow {
         self.set_property("new-view-title", view_title);
 
         // Retrieve list of in-use properties
-        let view_components_list = self.settings().strv("viewcomponentconfigs");
+        let view_components_list: Vec<String> = self.imp().get_setting::<Vec<String>>("viewcomponentconfigs");
+        // let view_components_list = self.settings().strv("viewcomponentconfigs");
         // println!("Possible Components: {:?}", view_components_list); //TEST
 
         // Create list of components in current view
