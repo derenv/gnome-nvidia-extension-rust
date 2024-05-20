@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /* *
@@ -25,7 +25,9 @@ extern crate gtk4_macros;
 extern crate gtk4_nvidia_monitor_rust;
 
 // Imports
-use adwaita::{prelude::ApplicationExtManual, Application};
+use adwaita::{
+    prelude::ApplicationExtManual, Application
+};
 
 pub fn init_ui() -> Application {
     // Intialise GTK & Create a new application
