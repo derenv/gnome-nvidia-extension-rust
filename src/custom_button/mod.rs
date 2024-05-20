@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,6 +21,9 @@
 mod imp;
 
 // Imports
+// std
+//
+// gtk-rs
 use glib::Object;
 use gtk::glib;
 
@@ -32,9 +35,10 @@ glib::wrapper! {
 
 impl CustomButton {
     pub fn new() -> Self {
-        Object::new(&[]).expect("Failed to create `CustomButton`.")
+        // Create Object
+        Object::builder::<CustomButton>().build()
     }
-    pub fn with_label(label: &str) -> Self {
-        Object::new(&[("label", &label)]).expect("Failed to create `CustomButton`.")
-    }
+    // pub fn with_label(label: &str) -> Self {
+    //     Object::with_label(&[("label", &label)]).expect("Failed to create `CustomButton`.")
+    // }
 }
