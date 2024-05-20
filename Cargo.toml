@@ -1,16 +1,27 @@
-# SPDX-FileCopyrightText: 2022 Deren Vural
+# SPDX-FileCopyrightText: 2024 Deren Vural
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "gtk4-nvidia-monitor-rust"
-version = "0.1.0"
+description = "A gtk-rs app for interacting with Nvidia GPU management interfaces like nvidia-settings and nvidia-smi."
+version = "0.2.0"
+homepage = "https://github.com/derenv/gtk4-nvidia-monitor-rust"
+repository = "https://github.com/derenv/gtk4-nvidia-monitor-rust"
+license = "GPL-3.0-or-later"
+keywords = ["gpu", "nvidia", "gtk4-rs"]
+categories = ["hardware-support"]
+readme = "README.md"
 edition = "2021"
+authors = ["Deren Vural <35734401+derenv@users.noreply.github.com>"]
+rust-version = "1.78.0"
+build = "build.rs"
 
 [dependencies]
-adwaita = { version = "^0.1.1", package = "libadwaita" }
-gtk = { version = "^0.4.8", package = "gtk4" }
-gdk = { version = "^0.4.8", package = "gdk4" }
-gtk4_macros = { version = "^0.5.2", package = "gtk4-macros" }
+adwaita = { version = "^0.6.0", package = "libadwaita" }
+gtk = { version = "^0.8.2", package = "gtk4" }
+gdk = { version = "^0.8.2", package = "gdk4" }
+gtk4_macros = { version = "^0.8.2", package = "gtk4-macros" }
 
 #serde = { version = "1.0", features = ["derive"] }
 #serde_json = "1.0"
@@ -20,4 +31,4 @@ gtk4_macros = { version = "^0.5.2", package = "gtk4-macros" }
 #libappindicator = { version = "^0.7.1", package = "libappindicator" }
 
 [build-dependencies]
-adwaita = { version = "^0.1.1", package = "libadwaita" }
+glib-build-tools = { version = "^0.19.0", package = "glib-build-tools" }
