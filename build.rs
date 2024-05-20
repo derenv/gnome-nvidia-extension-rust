@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -15,14 +15,10 @@
  * Deren Vural
  *
  * Notes:
- * imports must be added as a dependancy for build scripts via:
- *     `cargo add gtk4 --rename gtk --build`
- * which updates Cargo.toml with:
- *     [build-dependencies]
- *     gtk = { version = "^0.4.8", package = "gtk4" }
+ * 
  */
 // Imports
-use adwaita::gio::compile_resources;
+use glib_build_tools::compile_resources;
 
 /**
  * Name:
@@ -44,7 +40,7 @@ fn main() {
     // UI
     println!("..Compiling UI resources into `.gresource` file");
     compile_resources(
-        "src/resources",
+        &["src/resources"],
         "src/resources/resources.gresource.xml",
         "nvidiamonitorrust.gresource",
     );
