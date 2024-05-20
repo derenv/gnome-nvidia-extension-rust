@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,11 +21,20 @@
 mod imp;
 
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*};
-use gio::Settings;
-use glib::{clone, Object};
-use gtk::{Adjustment, CheckButton, StringList};
+// std
 use std::cell::RefMut;
+// gtk-rs
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*
+};
+use gio::Settings;
+use glib::{
+    clone, Object
+};
+use gtk::{
+    Adjustment, CheckButton, StringList
+};
 
 // Modules
 use crate::{mainwindow::MainWindow, settingswindow::imp::ParentContainer, APP_ID};
@@ -73,8 +82,9 @@ impl SettingsWindow {
      */
     pub fn new(app: &adwaita::Application, parent_window: &MainWindow) -> Self {
         // Create new window
-        let obj: SettingsWindow = Object::new(&[("application", app)])
-            .expect("`SettingsWindow` should be  instantiable.");
+        let obj: SettingsWindow = Object::builder::<SettingsWindow>()
+            .property("application", app)
+        .build();
 
         // Set custom properties
         //

@@ -1,8 +1,6 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*, ComboRow};
-use gio::Settings;
 /**
  * Name:
  * imp.rs
@@ -20,10 +18,30 @@ use gio::Settings;
  *
  */
 // Imports
-use glib::{once_cell::sync::Lazy, ParamSpec, Value};
-use glib::{once_cell::sync::OnceCell, signal::Inhibit, subclass::InitializingObject};
-use gtk::{subclass::prelude::*, CheckButton, CompositeTemplate, SpinButton, TemplateChild};
-use std::{cell::RefCell, cell::RefMut, rc::Rc};
+// std
+use std::sync::OnceLock;
+use std::cell::{
+    //Cell,
+    OnceCell, RefCell, RefMut
+};
+use std::rc::Rc;
+// gtk-rs
+use gtk::{
+    subclass::prelude::*,
+    CheckButton, CompositeTemplate, SpinButton, TemplateChild
+};
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*,
+    ComboRow
+};
+use gio::Settings;
+use glib::{
+    signal::Propagation,
+    ParamSpec, subclass::InitializingObject,
+    variant::Variant,
+    value::Value
+};
 
 // Modules
 //use crate::utils::data_path;
@@ -107,7 +125,11 @@ impl SettingsWindow {
      * Notes:
      *
      */
-    pub fn update_setting<T: ToVariant>(&self, name: &str, value: T) {
+    pub fn update_setting<T: Into<Variant> + Clone>(
+        &self,
+        name: &str,
+        value: T
+    ) {
         // Fetch settings
         match self.settings.get() {
             Some(settings) => match settings.set(name, &value) {
@@ -135,7 +157,10 @@ impl SettingsWindow {
      *
      */
     #[template_callback]
-    fn refreshrate_set(&self, button: &SpinButton) {
+    fn refreshrate_set(
+        &self,
+        button: &SpinButton
+    ) {
         // Get new refresh rate input
         let new_value: i32 = button.value_as_int();
 
@@ -160,7 +185,10 @@ impl SettingsWindow {
      *
      */
     #[template_callback]
-    fn temp_unit_set(&self, button: &CheckButton) {
+    fn temp_unit_set(
+        &self,
+        button: &CheckButton
+    ) {
         // Get list of buttons
         let check_buttons: [&CheckButton; 2] = [&self.temp_unit_c, &self.temp_unit_f];
 
@@ -224,11 +252,12 @@ impl ObjectImpl for SettingsWindow {
      * Notes:
      *
      */
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self) {
         // Call "constructed" on parent
-        self.parent_constructed(obj);
+        self.parent_constructed();
 
         // Setup
+        let obj: glib::BorrowedObject<super::SettingsWindow> = self.obj();
         obj.setup_settings();
         obj.restore_data();
         obj.setup_widgets();
@@ -261,16 +290,15 @@ impl ObjectImpl for SettingsWindow {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 //
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -289,7 +317,12 @@ impl ObjectImpl for SettingsWindow {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, _value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        _value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -314,7 +347,11 @@ impl ObjectImpl for SettingsWindow {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -359,7 +396,7 @@ impl WidgetImpl for SettingsWindow {}
  *
  */
 impl WindowImpl for SettingsWindow {
-    fn close_request(&self, window: &Self::Type) -> Inhibit {
+    fn close_request(&self) -> Propagation {
         /*
         // Store task data in vector
         let backup_data: Vec<TaskData> = window
@@ -390,7 +427,7 @@ impl WindowImpl for SettingsWindow {
             .emit_by_name::<i32>("update-all-views", &[]);
 
         // Pass close request on to the parent
-        self.parent_close_request(window)
+        self.parent_close_request()
     }
 }
 
