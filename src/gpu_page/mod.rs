@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -22,11 +22,21 @@ mod imp;
 use imp::ModificationWindowContainer;
 
 // Imports
-use adwaita::{gio, glib, Application, ViewStack};
-use gio::Settings;
-use glib::{clone, closure, Object};
-use gtk::{prelude::*, subclass::prelude::*, Align, Button, Grid, Label, LayoutChild, Orientation};
+// std
 use std::cell::RefMut;
+// gtk-rs
+use adwaita::{
+    gio, glib,
+    Application, ViewStack
+};
+use gio::Settings;
+use glib::{
+    clone, closure, Object
+};
+use gtk::{
+    prelude::*, subclass::prelude::*,
+    Align, Button, Grid, Label, LayoutChild, Orientation
+};
 
 // Modules
 use crate::{modificationwindow::ModificationWindow, provider::Provider, APP_ID};
@@ -72,8 +82,8 @@ impl GpuPage {
      *
      */
     pub fn new(uuid: &str, name: &str, provider: Provider) -> Self {
-        // Create new page
-        let obj: GpuPage = Object::new(&[]).expect("Failed to create `GpuPage`.");
+        // Create new page    
+        let obj: GpuPage = Object::builder::<GpuPage>().build();
 
         // Set custom properties
         obj.set_property("uuid", String::from(uuid));

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*
@@ -19,18 +19,33 @@
  */
 
 // Imports
-use adwaita::{gio, glib, prelude::*, ViewStack, ViewSwitcherBar};
+// std
+use std::sync::{
+    OnceLock, Arc, Mutex, MutexGuard
+};
+use std::cell::{
+    Cell, OnceCell, RefCell
+};
+use std::rc::Rc;
+// gtk-rs
+use gtk::{
+    subclass::prelude::*,
+    Align, CompositeTemplate, Grid, Label, LayoutChild, Orientation, TemplateChild
+};
+use adwaita::{
+    gio, glib,
+    prelude::*,
+    ViewStack, ViewSwitcherBar
+};
 use gio::Settings;
 use glib::{
-    once_cell::sync::Lazy, once_cell::sync::OnceCell, subclass::InitializingObject,
-    subclass::Signal, subclass::SignalType, translate::FromGlib, FromVariant, ParamSpec, SourceId,
-    ToValue, Value,
+    subclass::Signal,
+    translate::FromGlib,
+    subclass::InitializingObject, ParamSpec, SourceId,
+    variant::FromVariant, variant::Variant,
+    value::ToValue, value::Value,
+    ControlFlow::Continue
 };
-use gtk::{
-    subclass::prelude::*, Align, CompositeTemplate, Grid, Label, LayoutChild, Orientation,
-    TemplateChild,
-};
-use std::{cell::Cell, cell::RefCell, rc::Rc, sync::Arc, sync::Mutex, sync::MutexGuard};
 
 // Modules
 use crate::{modificationwindow::ModificationWindow, provider::Provider};
@@ -114,7 +129,10 @@ impl GpuPage {
      * Notes:
      *
      */
-    pub fn get_setting<T: FromVariant>(&self, name: &str) -> T {
+    pub fn get_setting<T: FromVariant>(
+        &self,
+        name: &str
+    ) -> T {
         // Return the value of the property
         match self.settings.get() {
             Some(settings) => settings.get::<T>(name),
@@ -138,7 +156,11 @@ impl GpuPage {
      * Notes:
      *
      */
-    pub fn update_setting<T: ToVariant>(&self, name: &str, value: T) {
+    pub fn update_setting<T: Into<Variant> + Clone>(
+        &self,
+        name: &str,
+        value: T
+    ) {
         // Fetch settings
         match self.settings.get() {
             Some(settings) => match settings.set(name, &value) {
@@ -165,7 +187,10 @@ impl GpuPage {
      * Notes:
      *
      */
-    pub fn replace_stack(&self, stack: Option<&ViewStack>) {
+    pub fn replace_stack(
+        &self,
+        stack: Option<&ViewStack>
+    ) {
         self.view_switcher.set_stack(stack);
     }
 
@@ -462,7 +487,7 @@ impl GpuPage {
                                 }
                                 Err(err) => {
                                     println!("panicked when fetching gpu data: `{}`", err);
-                                    return Continue(false);
+                                    return Continue;
                                 }
                             }
                         }
@@ -470,18 +495,19 @@ impl GpuPage {
                 }
                 None => {
                     println!("panicked when fetching current provider..");
-                    return Continue(false);
+                    return Continue;
                 }
             }
 
-            Continue(true)
+            Continue
         });
 
         // !!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!
         // Save ID of recurring closure
-        unsafe {
-            self.refreshid.set(id.as_raw());
-        }
+        self.refreshid.set(id.as_raw());
+        // unsafe {
+        //     self.refreshid.set(id.as_raw());
+        // }
         // !!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!!!UNSAFE CODE HERE!!
     }
 
@@ -607,13 +633,14 @@ impl ObjectImpl for GpuPage {
      * Notes:
      *
      */
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self) {
         // println!("CONSTRUCTED");//TEST
         // Call "constructed" on parent
-        self.parent_constructed(obj);
+        self.parent_constructed();
 
         // Setup
         self.refreshid.set(0);
+        let _obj: glib::BorrowedObject<super::GpuPage> = self.obj();
         //obj.setup_settings();
         //obj.load_properties();//TODO
         //obj.setup_widgets();
@@ -646,20 +673,18 @@ impl ObjectImpl for GpuPage {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        //println!("PROPERTIES");//TEST
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 glib::ParamSpecString::builder("uuid").build(),
                 glib::ParamSpecString::builder("name").build(),
-                glib::ParamSpecObject::builder("provider", glib::Type::OBJECT).build(),
-                glib::ParamSpecUInt::builder("refreshid").build(),
+                glib::ParamSpecObject::builder::<Provider>("provider").build(),
+                glib::ParamSpecUInt::builder("refreshid").build()
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -678,7 +703,12 @@ impl ObjectImpl for GpuPage {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         // println!("setting: {:?}", pspec.name());//TEST
@@ -744,7 +774,11 @@ impl ObjectImpl for GpuPage {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -792,15 +826,17 @@ impl ObjectImpl for GpuPage {
      * SignalType::from(i32::static_type())
      */
     fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![Signal::builder(
-                "update-views",
-                &[SignalType::from(i32::static_type())],
-                SignalType::from(i32::static_type()),
-            )
-            .build()]
-        });
-        SIGNALS.as_ref()
+        static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+        SIGNALS.get_or_init(|| {
+            vec![
+                Signal::builder("update-all-views")
+                    .param_types([i32::static_type()])
+                    .return_type::<i32>()
+                    .build()
+            ]
+        })
+
+        //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
     }
 }
 
