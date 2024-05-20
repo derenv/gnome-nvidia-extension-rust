@@ -28,6 +28,14 @@ Finally, run the app:
 cargo run
 ```
 
+# Dependancies
+
+RHEL distributions:
+
+```bash
+sudo dnf install glib pango gio gtk4 gtk4-devel libadwaita libadwaita-devel
+```
+
 # Resources
 ## Applications
 - [Original version, written in GTK-JS](https://github.com/ethanwharris/gnome-nvidia-extension)
