@@ -1,7 +1,6 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use adwaita::glib;
 /**
  * Name:
  * imp.rs
@@ -19,9 +18,16 @@ use adwaita::glib;
  *
  */
 // Imports
-use glib::{once_cell::sync::Lazy, ParamSpec, ToValue, Value};
-use gtk::subclass::prelude::*;
+// std
+use std::sync::OnceLock;
 use std::cell::Cell;
+// gtk-rs
+use gtk::subclass::prelude::*;
+use adwaita::glib;
+use glib::{
+    ParamSpec,
+    value::ToValue, value::Value
+};
 
 // Modules
 use crate::formatter::Formatter;
@@ -81,18 +87,17 @@ impl ObjectImpl for Property {
      * beware that you need to use kebab-case (<https://en.wikipedia.org/wiki/Letter_case#Kebab_case>)
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 glib::ParamSpecString::builder("id").build(),
-                glib::ParamSpecObject::builder("processor", glib::Type::OBJECT).build(),
-                glib::ParamSpecObject::builder("formatter", glib::Type::OBJECT).build(),
+                glib::ParamSpecObject::builder::<Processor>("processor").build(),
+                glib::ParamSpecObject::builder::<Formatter>("formatter").build(),
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -111,7 +116,12 @@ impl ObjectImpl for Property {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -153,7 +163,11 @@ impl ObjectImpl for Property {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {

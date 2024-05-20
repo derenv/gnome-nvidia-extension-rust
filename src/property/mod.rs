@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -20,10 +20,18 @@
 // Custom GObjects
 mod imp;
 
-use gdk::glib::value::FromValue;
 // Imports
-use glib::Object;
-use gtk::{glib, prelude::*};
+// std
+//
+// gtk-rs
+use gtk::{
+    prelude::*,
+    glib
+};
+use glib::{
+    value::FromValue,
+    Object
+};
 
 // Modules
 use crate::formatter::Formatter;
@@ -72,8 +80,13 @@ impl Property {
      *
      * given proc and gpuCount
      */
-    pub fn new(processor: &Processor, formatter: &Formatter, id: &str) -> Self {
-        let obj: Property = Object::new(&[]).expect("Failed to create `Property`.");
+    pub fn new(
+        processor: &Processor,
+        formatter: &Formatter,
+        id: &str
+    ) -> Self {
+        // Create Object        
+        let obj: Property = Object::builder::<Property>().build();
 
         // Set properties
         obj.set_property("processor", processor);
@@ -100,7 +113,10 @@ impl Property {
      * Notes:
      *
      */
-    pub fn parse(self, uuid: &str) -> Option<String> {
+    pub fn parse(
+        self,
+        uuid: &str
+    ) -> Option<String> {
         // println!("UUID: `{}`", uuid); //TEST
         // Grab formatter & processor
         let formatter: Formatter = self.property("formatter");
@@ -159,31 +175,38 @@ impl Property {
      * Notes:
      *
      */
-    pub fn get_value<T: for<'a> FromValue<'a> + 'static>(&self, name: &str) -> T {
+    pub fn get_value<T: for<'a> FromValue<'a> + 'static>(
+        &self,
+        name: &str
+    ) -> T {
         // Return the value of the property
         self.property::<T>(name)
     }
 
-    /**
-     * Name:
-     * update_value
-     *
-     * Description:
-     * Update a property with a new value
-     *
-     * Made:
-     * 29/10/2022
-     *
-     * Made by:
-     * Deren Vural
-     *
-     * Notes:
-     *
-     */
-    pub fn update_value<T: ToValue>(&self, property_name: &str, value: T) {
-        // Update the property with new value
-        self.set_property(property_name, value);
-    }
+    // /**
+    //  * Name:
+    //  * update_value
+    //  *
+    //  * Description:
+    //  * Update a property with a new value
+    //  *
+    //  * Made:
+    //  * 29/10/2022
+    //  *
+    //  * Made by:
+    //  * Deren Vural
+    //  *
+    //  * Notes:
+    //  *
+    //  */
+    // pub fn update_value<T: Into<Variant>>(
+    //     &self,
+    //     property_name: &str,
+    //     value: T
+    // ) {
+    //     // Update the property with new value
+    //     self.set_property(property_name, value);
+    // }
 }
 
 /**
