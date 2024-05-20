@@ -1,9 +1,6 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use adwaita::glib;
-use glib::{once_cell::sync::Lazy, ParamSpec, Value};
-use gtk::{prelude::*, subclass::prelude::*};
 /**
  * Name:
  * imp.rs
@@ -23,7 +20,18 @@ use gtk::{prelude::*, subclass::prelude::*};
  * <https://github.com/gtk-rs/gtk4-rs/blob/master/book/listings/g_object_properties/4/custom_button/mod.rs>
  */
 // Imports
+// std
+use std::sync::OnceLock;
 use std::cell::Cell;
+// gtk-rs
+use gtk::{
+    prelude::*, subclass::prelude::*
+};
+use adwaita::glib;
+use glib::{
+    ParamSpec,
+    value::Value
+};
 
 /// Object holding the State and any Template Children
 #[derive(Default)]
@@ -87,19 +95,18 @@ impl ObjectImpl for Processor {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 glib::ParamSpecString::builder("base-call").build(),
                 glib::ParamSpecString::builder("start-call").build(),
                 glib::ParamSpecString::builder("middle-call").build(),
-                glib::ParamSpecString::builder("end-call").build(),
+                glib::ParamSpecString::builder("end-call").build()
             ]
-        });
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -118,7 +125,12 @@ impl ObjectImpl for Processor {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -166,7 +178,11 @@ impl ObjectImpl for Processor {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {

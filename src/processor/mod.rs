@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -22,9 +22,14 @@
 mod imp;
 
 // Imports
-use glib::Object;
-use gtk::{gio, glib, prelude::ObjectExt};
+// std
 use std::ffi::OsStr;
+// gtk-rs
+use gtk::{
+    gio, glib,
+    prelude::ObjectExt
+};
+use glib::Object;
 
 // Crates
 use crate::subprocess::subprocess::exec_communicate_sync;
@@ -75,7 +80,8 @@ impl Processor {
         middle_call: Option<&str>,
         end_call: &str,
     ) -> Self {
-        let obj: Processor = Object::new(&[]).expect("Failed to create `Processor`");
+        // Create Object        
+        let obj: Processor = Object::builder::<Processor>().build();
 
         // Set properties
         obj.set_property("base-call", String::from(base_call));
