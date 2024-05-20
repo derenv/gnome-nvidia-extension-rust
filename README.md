@@ -1,5 +1,5 @@
 <!--[![dependency status](https://deps.rs/repo/github/derenv/gtk4-nvidia-monitor-rust/status.svg)](https://deps.rs/repo/github/derenv/gtk4-nvidia-monitor-rust)
-SPDX-FileCopyrightText: 2022 Deren Vural
+SPDX-FileCopyrightText: 2024 Deren Vural
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
