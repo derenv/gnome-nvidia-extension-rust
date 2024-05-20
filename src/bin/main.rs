@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,7 +21,13 @@
 extern crate gtk4_nvidia_monitor_rust;
 
 // Imports
-use adwaita::{prelude::ApplicationExtManual, Application};
+// std
+//
+// gtk-rs
+use adwaita::{
+    prelude::ApplicationExtManual,
+    Application
+};
 
 /**
  * Name:
@@ -44,5 +50,5 @@ fn main() {
     let app: Application = gtk4_nvidia_monitor_rust::create_app();
 
     // Run the application
-    println!("{}", app.run());
+    println!("{:?}", app.run());
 }
