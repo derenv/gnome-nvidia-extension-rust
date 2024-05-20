@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -21,11 +21,19 @@
 mod imp;
 
 // Imports
-use adwaita::{gio, glib};
-use gio::{Cancellable, Settings};
-use glib::Object;
-use gtk::{prelude::*, subclass::prelude::*};
+// std
 use std::ffi::OsStr;
+// gtk-rs
+use gtk::{
+    prelude::*, subclass::prelude::*
+};
+use adwaita::{
+    gio, glib
+};
+use gio::{
+    Cancellable, Settings
+};
+use glib::Object;
 
 // Crates
 use crate::{
@@ -78,7 +86,8 @@ impl Provider {
      *
      */
     pub fn new(func: fn() -> Vec<Property>, provider_type: i32) -> Self {
-        let obj: Provider = Object::new(&[]).expect("Failed to create `Provider`");
+        // Create Object        
+        let obj: Provider = Object::builder::<Provider>().build();
 
         // Set type of provider
         obj.set_property("provider-type", provider_type);

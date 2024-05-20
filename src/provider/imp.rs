@@ -1,7 +1,6 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-use adwaita::glib;
 /**
  * Name:
  * imp.rs
@@ -19,9 +18,20 @@ use adwaita::glib;
  *
  */
 // Imports
-use glib::{once_cell::sync::Lazy, ParamSpec, Value};
-use gtk::{prelude::*, subclass::prelude::*};
-use std::{cell::Cell, cell::RefCell};
+// std
+use std::sync::OnceLock;
+use std::cell::{
+    Cell, RefCell
+};
+// gtk-rs
+use gtk::{
+    prelude::*, subclass::prelude::*
+};
+use adwaita::glib;
+use glib::{
+    ParamSpec,
+    value::Value
+};
 
 // Modules
 use crate::property::Property;
@@ -86,13 +96,15 @@ impl ObjectImpl for Provider {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> =
-            Lazy::new(|| vec![glib::ParamSpecInt::builder("provider-type").build()]);
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
+            vec![
+                glib::ParamSpecInt::builder("provider-type").build()
+            ]
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -111,7 +123,12 @@ impl ObjectImpl for Provider {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -141,7 +158,11 @@ impl ObjectImpl for Provider {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
