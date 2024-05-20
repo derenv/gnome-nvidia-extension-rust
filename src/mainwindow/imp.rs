@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -18,23 +18,35 @@
  *
  */
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*};
+// std
+use std::sync::OnceLock;
+use std::cell::{
+    Cell, OnceCell, RefCell, RefMut
+};
+use std::rc::Rc;
+// gtk-rs
+use gtk::{
+    subclass::prelude::*,
+    Button, CompositeTemplate, PolicyType, ScrolledWindow, Stack, TemplateChild
+};
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*
+};
 use gio::Settings;
 use glib::{
-    once_cell::sync::Lazy, once_cell::sync::OnceCell, signal::Inhibit,
-    subclass::InitializingObject, subclass::Signal, subclass::SignalType, FromVariant, ParamSpec,
-    Value,
+    subclass::Signal, signal::Propagation,
+    subclass::InitializingObject, ParamSpec,
+    variant::FromVariant, variant::Variant,
+    value::Value,
+    BorrowedObject
 };
-use gtk::{
-    subclass::prelude::*, Button, CompositeTemplate, PolicyType, ScrolledWindow, Stack,
-    TemplateChild,
-};
-use std::{cell::Cell, cell::RefCell, cell::RefMut, rc::Rc};
 
 // Modules
 use crate::{
-    formatter::Formatter, gpu_page::GpuPage, processor::Processor, property::Property,
-    provider::Provider, settingswindow::SettingsWindow,
+    settingswindow::SettingsWindow,
+    gpu_page::GpuPage, 
+    formatter::Formatter, processor::Processor, property::Property, provider::Provider
 };
 
 /// Structure for storing a SettingsWindow object and any related information
@@ -118,7 +130,10 @@ impl MainWindow {
      * Notes:
      *
      */
-    pub fn get_setting<T: FromVariant>(&self, name: &str) -> T {
+    pub fn get_setting<T: FromVariant>(
+        &self,
+        name: &str
+    ) -> T {
         // Return the value of the property
         match self.settings.get() {
             Some(settings) => settings.get::<T>(name),
@@ -142,7 +157,11 @@ impl MainWindow {
      * Notes:
      *
      */
-    pub fn update_setting<T: ToVariant>(&self, name: &str, value: T) {
+    pub fn update_setting<T: Into<Variant> + Clone>(
+        &self,
+        name: &str,
+        value: T
+    ) {
         // Fetch settings
         match self.settings.get() {
             Some(settings) => match settings.set(name, &value) {
@@ -169,7 +188,12 @@ impl MainWindow {
      * Notes:
      *
      */
-    fn create_gpu_page(&self, uuid: &str, name: &str, provider: Provider) {
+    fn create_gpu_page(
+        &self,
+        uuid: &str,
+        name: &str,
+        provider: Provider
+    ) {
         // Create new GpuPage object
         let new_page: GpuPage = GpuPage::new(uuid, name, provider);
 
@@ -208,7 +232,10 @@ impl MainWindow {
      * Notes:
      *
      */
-    pub fn create_provider(&self, provider_type: i32) -> Provider {
+    pub fn create_provider(
+        &self,
+        provider_type: i32
+    ) -> Provider {
         //println!("CREATING PROVIDER");
         //println!("..PROVIDER TYPE: `{}`", provider_type);
 
@@ -1603,11 +1630,12 @@ impl ObjectImpl for MainWindow {
      * Notes:
      *
      */
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self) {
         // Call "constructed" on parent
-        self.parent_constructed(obj);
+        self.parent_constructed();
 
         // Setup
+        let obj: BorrowedObject<super::MainWindow> = self.obj();
         obj.setup_settings();
         obj.setup_widgets();
         obj.restore_data();
@@ -1640,14 +1668,15 @@ impl ObjectImpl for MainWindow {
      * glib::ParamSpecObject::builder("formatter").build(),
      */
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
-            vec![glib::ParamSpecObject::builder("provider", glib::Type::OBJECT).build()]
-        });
+        static PROPERTIES: OnceLock<Vec<ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
+            vec![
+                glib::ParamSpecObject::builder::<Provider>("provider").build()
+            ]
+        })
 
         //println!("PROPERTIES: {:?}", PROPERTIES);//TEST
         //println!("trying to add `base_call`: {:?}", glib::ParamSpecString::builder("base_call").build());//TEST
-
-        PROPERTIES.as_ref()
     }
 
     /**
@@ -1666,7 +1695,12 @@ impl ObjectImpl for MainWindow {
      * Notes:
      *
      */
-    fn set_property(&self, _obj: &Self::Type, _id: usize, value: &Value, pspec: &ParamSpec) {
+    fn set_property(
+        &self,
+        _id: usize,
+        value: &Value,
+        pspec: &ParamSpec
+    ) {
         //println!("setting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -1696,7 +1730,11 @@ impl ObjectImpl for MainWindow {
      * Notes:
      *
      */
-    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &ParamSpec) -> Value {
+    fn property(
+        &self,
+        _id: usize,
+        pspec: &ParamSpec
+    ) -> Value {
         //println!("getting: {:?}", pspec.name());//TEST
 
         match pspec.name() {
@@ -1733,15 +1771,14 @@ impl ObjectImpl for MainWindow {
      * SignalType::from(i32::static_type())
      */
     fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![Signal::builder(
-                "update-all-views",
-                &[],
-                SignalType::from(i32::static_type()),
-            )
-            .build()]
-        });
-        SIGNALS.as_ref()
+        static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+        SIGNALS.get_or_init(|| {
+            vec![
+                Signal::builder("update-all-views")
+                    .return_type::<i32>()
+                    .build()
+            ]
+        })
     }
 }
 
@@ -1796,7 +1833,7 @@ impl WindowImpl for MainWindow {
      * Notes:
      *
      */
-    fn close_request(&self, window: &Self::Type) -> Inhibit {
+    fn close_request(&self) -> Propagation {
         /*
         //NOTE: this was meant for saving to json, probably unecessary now that i'm not using it..
 
@@ -1853,7 +1890,7 @@ impl WindowImpl for MainWindow {
         self.update_setting("modification-open", false);
 
         // Pass close request on to the parent
-        self.parent_close_request(window)
+        self.parent_close_request()
     }
 }
 

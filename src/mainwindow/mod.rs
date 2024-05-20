@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Deren Vural
+// SPDX-FileCopyrightText: 2024 Deren Vural
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
@@ -22,10 +22,19 @@ mod imp;
 use imp::SettingsWindowContainer;
 
 // Imports
-use adwaita::{gio, glib, prelude::*, subclass::prelude::*};
-use gio::{Settings, SimpleAction};
-use glib::{clone, closure, Object};
+// std
 use std::cell::RefMut;
+// gtk-rs
+use adwaita::{
+    gio, glib,
+    prelude::*, subclass::prelude::*
+};
+use gio::{
+    Settings, SimpleAction
+};
+use glib::{
+    clone, closure, Object
+};
 
 // Modules
 use crate::{provider::Provider, settingswindow::SettingsWindow, APP_ID};
@@ -71,9 +80,13 @@ impl MainWindow {
      * Notes:
      *
      */
-    pub fn new(app: &adwaita::Application) -> Self {
+    pub fn new(
+        app: &adwaita::Application
+    ) -> Self {
         // Create new window
-        Object::new(&[("application", app)]).expect("`MainWindow` should be  instantiable.")
+        Object::builder::<MainWindow>()
+            .property("application", app)
+        .build()
     }
 
     /**
