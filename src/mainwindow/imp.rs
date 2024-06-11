@@ -21,7 +21,7 @@
 // std
 use std::sync::OnceLock;
 use std::cell::{
-    Cell, OnceCell, RefCell, RefMut
+    Cell, OnceCell, RefCell, RefMut, Ref
 };
 use std::rc::Rc;
 // gtk-rs
@@ -73,6 +73,7 @@ pub struct MainWindow {
 
     // Private
     gpu_pages: RefCell<Vec<GpuPage>>,
+    gpu_names: RefCell<Vec<String>>,
 
     // Template Children
     #[template_child]
@@ -1394,24 +1395,29 @@ impl MainWindow {
      */
     pub fn refresh_cards(&self) {
         // Clear current ActionRow objects from GtkListBox
-        let mut done: bool = false;
-        while !done {
-            // Try to grab a child
-            let current_child: Option<gtk::Widget> = self.gpu_stack.get().first_child();
+        println!("Clearing gpu_stack!"); //TEST
 
-            // Check if there are any children left
-            match current_child {
-                Some(valid_child) => {
-                    // Remove child
-                    self.gpu_stack.get().remove(&valid_child);
-                }
-                None => {
-                    // End loop
-                    done = true;
-                }
+        // Get reference to stack
+        let stack: Stack = self.gpu_stack.get();
+
+        // For each stored GPU name
+        for gpu_name in self.gpu_names.take()
+        {
+            // Get appropriate gpu_page
+            let child: Option<gtk::Widget> = stack.child_by_name(&gpu_name);
+
+            // Remove page
+            if let Some(valid_child) = child {
+                stack.remove(&valid_child);
+            }
+            else
+            {
+                //TODO: add better error handling here..
+                println!("Missing GPU page for `{}`", gpu_name);
             }
         }
 
+        println!("Populating gpu_stack!"); //TEST
         // Grab copy of current provider
         let provider_container: Option<Provider> = self.provider.take();
         self.provider.set(provider_container.clone());
@@ -1419,6 +1425,7 @@ impl MainWindow {
         match provider_container {
             // If provider does exist
             Some(existing_provider) => {
+                println!("Provider exists!"); //TEST
                 // Check provider type in settings
                 let provider_type: i32 = self.get_setting::<i32>("provider");
 
@@ -1505,6 +1512,7 @@ impl MainWindow {
             }
             // If provider does not exist
             None => {
+                println!("No provider exists, checking settings!"); //TEST
                 // Check provider type
                 let provider_type: i32 = self.get_setting::<i32>("provider");
 
@@ -1531,7 +1539,7 @@ impl MainWindow {
                                         Some(prov) => match prov.get_gpu_data(&uuid, "name") {
                                             Ok(gpu_name) => {
                                                 // Create new GpuPage object and Add to list of pages
-                                                self.create_gpu_page(&uuid, &gpu_name, prov);
+                                                self.create_gpu_page(&uuid, &gpu_name, prov); //SEGFAULT
                                             },
                                             Err(err) => {
                                                 println!("..Attempt to read GPU name failed, returning: {}", err);
@@ -1592,7 +1600,7 @@ impl MainWindow {
      */
     #[template_callback]
     fn refresh_cards_clicked(&self, _button: &Button) {
-        // println!("GPU Scan Button Pressed!"); //TEST
+        println!("GPU Scan Button Pressed!"); //TEST
         self.refresh_cards();
     }
 }

@@ -51,11 +51,23 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <key name="viewconfigs" type="as">
       <default>[
+      "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:0:GPU",
+      "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:1:VRAM",
+      "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:2:Fans"
       ]</default>
     </key>
 
     <key name="viewcomponentconfigs" type="as">
       <default>[
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:GPU:0:util",
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:GPU:1:temp",
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:GPU:2:power_usage",
+
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:VRAM:2:memory_usage",
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:VRAM:3:memory_total",
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:VRAM:4:mem_ctrl_util",
+
+        "GPU-fb231809-72f7-79fd-eb6c-178b24827aa9:Fans:5:fan_speed"
       ]</default>
     </key>
   </schema>

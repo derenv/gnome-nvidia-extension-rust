@@ -27,7 +27,7 @@ use std::cell::RefMut;
 // gtk-rs
 use adwaita::{
     gio, glib,
-    Application, ViewStack
+    Application, ViewStack, ViewStackPage
 };
 use gio::Settings;
 use glib::{
@@ -92,7 +92,7 @@ impl GpuPage {
 
         // Apply any setup actions that need the above properties
         obj.setup_settings();
-        obj.setup_widgets();
+        obj.setup_widgets();//SEGFAULT
 
         // Return final object
         obj
@@ -291,16 +291,21 @@ impl GpuPage {
                 None => panic!("Cannot fetch layout manager of grid.."),
             }
 
+            // content_grid parent is self (gpupage)
+            // new_grid parent is content_grid
+
             // Save built view
             // Create new view stack
             let new_stack: ViewStack = ViewStack::new();
             // Add object
-            new_stack.add_titled(&new_grid, Some("default"), "Default");
+            new_stack.add(&content_grid);
+            //let new_item: ViewStackPage = new_stack.add(&new_grid);
+            //let new_item: ViewStackPage = new_stack.add_titled(&new_grid, Some("viewstack-page"), "viewstack");//SEGFAULT
             // Add icon
             //NOTE: see <https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/stable/latest/docs/libadwaita/struct.ViewStack.html>
             //      function "add_titled_with_icon" not in stable yet
-            let new_item = new_stack.page(&new_grid);
-            new_item.set_icon_name(Some("package-x-generic-symbolic"));
+            //let new_item = new_stack.page(&new_grid);
+            //new_item.set_icon_name(Some("package-x-generic-symbolic"));
             // Replace current view stack
             self.imp().replace_stack(Some(&new_stack));
         } else {
@@ -562,7 +567,7 @@ impl GpuPage {
                     &new_view_grid,
                     Some(&new_stack_item_name),
                     &loaded_views[index],
-                );
+                );//SEGFAULT
                 // println!("NEW STACK ITEM: `{}`", new_stack_item_name);//TEST
                 // Add icon
                 //NOTE: see <https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/stable/latest/docs/libadwaita/struct.ViewStack.html>
@@ -601,7 +606,7 @@ impl GpuPage {
      */
     fn setup_widgets(&self) {
         // Load stored views
-        self.load_views();
+        self.load_views();//SEGFAULT
 
         // Connect closure to re-load (now updated) stored views when a modification window is closed
         //NOTE: expected return value seems to be broken - look at imp.rs:395
