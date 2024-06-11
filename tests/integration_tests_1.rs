@@ -43,5 +43,5 @@ fn test_test() {
     let app: Application = init_ui();
 
     // Run the application
-    assert_eq!(app.run(), 0);
+    assert_eq!(app.run(), 0.into());
 }
